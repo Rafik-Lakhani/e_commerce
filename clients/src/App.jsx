@@ -19,10 +19,11 @@ import UnAuth from "./pages/un-auth/UnAuth";
 function App() {
   const isAuthenticated = false;
   const user = {
-    name:"",
-    email:"",
-    role:""
+    name: "",
+    email: "",
+    role: "",
   };
+
   return (
     <div className="flex flex-col overflow-hidden bg-white">
       <h1></h1>
