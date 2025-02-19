@@ -20,8 +20,8 @@ function UserLogin() {
       if (typeof data.payload === "string") {
         toast.error(data);
       } else {
-        navigate("/");
-        toast.success("Register Successfully");
+        navigate("/shop/home");
+        toast.success("Login Successfully");
       }
     });
   }

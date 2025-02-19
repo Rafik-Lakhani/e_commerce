@@ -32,6 +32,19 @@ export const loginUser= createAsyncThunk("/auth/login", async(formData)=>{
   }
 });
 
+export const checkAuth= createAsyncThunk("/auth/checkauth", async(formData)=>{
+  const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/auth/check-auth`,{
+    withCredentials:true
+  }).catch((err) =>{return err.response});
+  if(response.status==200 || response.status==201){
+    return response.data.user;
+  }
+  else{
+    return response.data.message;
+  }
+});
+
+
 export const AuthSlice = createSlice({
   name: 'auth',
   initialState,
@@ -44,7 +57,7 @@ export const AuthSlice = createSlice({
     builder.addCase(registeruser.pending,(state,action)=>{
       state.isLoading=true;
     }).addCase(registeruser.fulfilled,(state,action)=>{
-      if(action.payload.typeOf==Object){
+      if(typeof action.payload=="object"){
         state.isLoading=false
         state.isAuthenticated=true;
         state.user=action.payload;
@@ -63,7 +76,8 @@ export const AuthSlice = createSlice({
     builder.addCase(loginUser.pending,(state,action)=>{
       state.isLoading=true;
     }).addCase(loginUser.fulfilled,(state,action)=>{
-      if(action.payload.typeOf==Object){
+      console.log(typeof action.payload);
+      if(typeof action.payload=="object"){
         state.isLoading=false
         state.isAuthenticated=true;
         state.user=action.payload;
@@ -76,7 +90,27 @@ export const AuthSlice = createSlice({
     }).addCase(loginUser.rejected,(state,action)=>{
       state.isLoading=false;
       console.log(action);
-    })
+    });
+
+    // here auth event
+    builder.addCase(checkAuth.pending,(state,action)=>{
+      state.isLoading=true;
+    }).addCase(checkAuth.fulfilled,(state,action)=>{
+      if(typeof action.payload=="object"){
+        state.isLoading=false
+        state.isAuthenticated=true;
+        state.user=action.payload;
+      }
+      else{
+        state.isLoading=false
+        state.isAuthenticated=false;
+        state.user=null;
+      }
+    }).addCase(checkAuth.rejected,(state,action)=>{
+      state.isLoading=false;
+      console.log(action);
+    });
+
   }
 })
 

@@ -15,15 +15,23 @@ import ShoppingCheckOut from "./pages/shopping-view/ShoppingCheckOut";
 import ShoppingAccount from "./pages/shopping-view/ShoppingAccount";
 import CheckUserAuth from "./components/common/CheckUserAuth";
 import UnAuth from "./pages/un-auth/UnAuth";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { checkAuth } from "./store/auth-slice.js";
+import { toast } from "react-toastify";
 
 function App() {
-  const isAuthenticated = false;
-  const user = {
-    name: "",
-    email: "",
-    role: "",
-  };
-
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(checkAuth()).then((data) => {
+      if (typeof data.payload === "string") {
+        navigate("/auth/login");
+      } else {
+        navigate("/shop/home");
+      }
+    });
+  }, []);
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
   return (
     <div className="flex flex-col overflow-hidden bg-white">
       <h1></h1>

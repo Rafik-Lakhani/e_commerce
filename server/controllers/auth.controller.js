@@ -1,4 +1,5 @@
 import userSchema from '../models/user.models.js'
+import jwt from 'jsonwebtoken';
 
 export const registerUser = async(req,res) =>{
     const {userName,password,email} = await req.body;
@@ -36,6 +37,30 @@ export const loginUser = async(req,res) =>{
 export const logoutUser = async(req,res) =>{
     res.clearCookie("token");
     res.send({message:"User logged out successfully"});
+}
 
+export const authMiddleware = async(req,res,next) =>{
+    const token = req.cookies.token;
+    if(!token) return res.status(401).send({message:"Unauthorized"});
+    
+    try{
+        console.log(token);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        console.log(decoded);
+        const user = await userSchema.findById(decoded.id);
+        if(!user) return res.status(404).send({message:"User not found"});
+        req.user = user;
+        next();
+    }
+    catch(err){
+        return res.status(401).send({message:"Invalid token"});
+    }
+}
+
+export const checkAuth = async(req,res,next) =>{
+    res.status(200).send({message:"User Authenticated",user:req.user});
+}
+export const getUserProfile = async(req,res) =>{
+    res.status(200).send({message:"User profile",user:req.user});
 }
 

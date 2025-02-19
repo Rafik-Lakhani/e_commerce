@@ -22,7 +22,7 @@ function UserRegister() {
       if (typeof data.payload === 'string') {
         toast.error(data);
       } else {
-        navigate("/");
+        navigate("/shop/home");
         toast.success("Register Successfully");
       }
     });
