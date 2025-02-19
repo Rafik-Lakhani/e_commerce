@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route,useNavigate } from "react-router-dom";
 import AuthLayout from "./components/auth/AuthLayout";
 import AuthLogin from "./pages/auth/UserLogin";
 import AuthRegister from "./pages/auth/UserRegister";
@@ -21,17 +21,26 @@ import { checkAuth } from "./store/auth-slice.js";
 import { toast } from "react-toastify";
 
 function App() {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(checkAuth()).then((data) => {
       if (typeof data.payload === "string") {
         navigate("/auth/login");
-      } else {
-        navigate("/shop/home");
+        return;
       }
     });
   }, []);
-  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const { isAuthenticated, user, isLoading } = useSelector(
+    (state) => state.auth
+  );
+  if (isLoading){
+    return (
+      <div className="flex justify-center items-center h-screen w-screen">
+        <h1>Loading....</h1>
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col overflow-hidden bg-white">
       <h1></h1>

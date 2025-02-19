@@ -44,9 +44,7 @@ export const authMiddleware = async(req,res,next) =>{
     if(!token) return res.status(401).send({message:"Unauthorized"});
     
     try{
-        console.log(token);
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log(decoded);
         const user = await userSchema.findById(decoded.id);
         if(!user) return res.status(404).send({message:"User not found"});
         req.user = user;

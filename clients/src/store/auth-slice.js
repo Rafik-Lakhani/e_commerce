@@ -4,7 +4,7 @@ import {toast} from 'react-toastify';
 
 const initialState = {
   isAuthenticated: false,
-  isLoading: false,
+  isLoading: true,
   user: null
 }
 
@@ -58,7 +58,7 @@ export const AuthSlice = createSlice({
       state.isLoading=true;
     }).addCase(registeruser.fulfilled,(state,action)=>{
       if(typeof action.payload=="object"){
-        state.isLoading=false
+        state.isLoading=false;
         state.isAuthenticated=true;
         state.user=action.payload;
       }
