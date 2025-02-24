@@ -4,7 +4,8 @@ import {
   ChartNoAxesCombined,
   LayoutDashboard,
   ShoppingBasket,
-  CircleX
+  CircleX,
+  NotebookText
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -26,6 +27,12 @@ export const adminSidebarMenu = [
     label: "Orders",
     path: "/admin/orders",
     icon: <BadgeCheck />,
+  },
+  {
+    id: "features",
+    label: "Features",
+    path: "/admin/features",
+    icon: <CircleX />,
   },
 ];
 

@@ -36,7 +36,7 @@ export const loginUser = async(req,res) =>{
 
 export const logoutUser = async(req,res) =>{
     res.clearCookie("token");
-    res.send({message:"User logged out successfully"});
+    res.status(200).send({message:"User logged out successfully"});
 }
 
 export const authMiddleware = async(req,res,next) =>{

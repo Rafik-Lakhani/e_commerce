@@ -44,6 +44,17 @@ export const checkAuth= createAsyncThunk("/auth/checkauth", async(formData)=>{
   }
 });
 
+export const logoutUser= createAsyncThunk("/auth/logout", async(formData)=>{
+  const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/auth/logout`,{
+    withCredentials:true
+  }).catch((err) =>{return err.response});
+  if(response.status==200 || response.status==201){
+    return response.data.message;
+  }
+  else{
+    return false;
+  }
+});
 
 export const AuthSlice = createSlice({
   name: 'auth',
@@ -110,6 +121,32 @@ export const AuthSlice = createSlice({
       state.isLoading=false;
       console.log(action);
     });
+
+    // here logout event
+    builder.addCase(logoutUser.pending,(state,action)=>{
+      state.isLoading=true;
+    }).addCase(logoutUser.fulfilled,(state,action)=>{
+      if(typeof action.payload=="string"){
+        state.isLoading=false;
+        state.isAuthenticated=false;
+        state.user=null;
+        toast.success("Logged out successfully");
+      }
+      else{
+        state.isLoading=false
+        state.isAuthenticated=false;
+        state.user=null;
+        toast.success("Logged out successfully");
+      }
+    }).addCase(logoutUser.rejected,(state,action)=>{
+      state.isLoading=false;
+      state.isAuthenticated=false;
+      state.user=null;
+      toast.error("Failed to logout");
+      console.log(action);
+    });
+
+
 
   }
 })

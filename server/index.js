@@ -4,6 +4,7 @@ import { dbConnection } from './config/db.connection.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import authRouter from './routes/auth.routes.js';
+import adminProductsRouter from './routes/products.routes.js';
 
 
 const app = express();
@@ -16,10 +17,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors({
-    origin: process.env.CLIENT_URL,
-    credentials: true
+  origin: process.env.CLIENT_URL,
+  credentials: true
 }));
-app.use('/api/auth',authRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/admin/products', adminProductsRouter)
 
 
 

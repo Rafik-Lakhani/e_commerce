@@ -1,11 +1,14 @@
 import React from 'react'
 import { AlignJustify, LogOut } from "lucide-react";
+import { useDispatch } from 'react-redux';
+import { logoutUser } from '../../store/auth-slice.js';
 
 function AdminHeader({setOpen,open}) {
+  const dispatch = useDispatch();
   const handleLogout = () => {
     // Your logout logic here
+    dispatch(logoutUser());
   };
-  console.log(open);
   return (
     <header className="flex justify-between items-center px-4 py-3 bg-background border-b ">
       <button onClick={() => setOpen(true)} className={`lg:hidden sm:block ${open ? "sm:hidden":""}`}>
