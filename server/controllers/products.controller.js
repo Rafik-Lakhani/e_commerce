@@ -51,7 +51,7 @@ export const addProduct = async (req, res) => {
         );
         await newProduct.save();
         if (!newProduct) {
-            return res.status(400).json({ message: 'Product not added and server error' });
+            return res.status(400).json({ message: 'Product not added and server error',product: newProduct});
         }
         res.status(201).json({ message: 'Product added successfully' });
     } catch (e) {
