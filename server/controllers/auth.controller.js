@@ -62,3 +62,22 @@ export const getUserProfile = async(req,res) =>{
     res.status(200).send({message:"User profile",user:req.user});
 }
 
+
+// here is middleware is chack if request for admin or not 
+
+export const AdminAuthMiddleware = async (req, res, next) => {
+    const token = req.cookies.token;
+    if (!token) return res.status(401).send({ message: "Unauthorized" });
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await userSchema.findById(decoded.id);
+        if (!user) return res.status(404).send({ message: "User not found" });
+        if (user.role != "admin") return res.status(404).send({ message: "Can not access this Unauthenticated" });
+        req.user = user;
+        next();
+    }
+    catch (err) {
+        return res.status(401).send({ message: "Invalid token" });
+    }
+}

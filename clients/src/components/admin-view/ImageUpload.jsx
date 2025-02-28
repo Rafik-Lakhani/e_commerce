@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { FileIcon, UploadCloudIcon, XIcon } from "lucide-react";
+import { FileIcon, UploadCloudIcon, ImageOff, XIcon } from "lucide-react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -10,6 +10,7 @@ function ImageUpload({
   setUploadImageUrl,
   setImageLoadingState,
   imageLoadingState,
+  isEditMode,
 }) {
   const inputRef = useRef(null);
   const [previews, setPreviews] = useState([]); // Stores image previews
@@ -82,6 +83,7 @@ function ImageUpload({
         }
       );
       console.log(response.status);
+      console.log(response);
       if (response.status == 200) {
         setUploadImageUrl(response.data.results);
         toast.success("Images uploaded successfully!");
@@ -89,6 +91,7 @@ function ImageUpload({
         toast.error("Failed to upload images");
       }
     } catch (error) {
+      console.log(error);
       toast.error("Error uploading images");
     } finally {
       setImageLoadingState(false);
@@ -106,7 +109,9 @@ function ImageUpload({
       <div
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        className="border-2 border-dashed rounded-lg p-4"
+        className={` ${
+          isEditMode ? "opacity-40" : ""
+        } border-2 border-dashed rounded-lg p-4 mb-4`}
       >
         <input
           id="image-upload"
@@ -116,6 +121,7 @@ function ImageUpload({
           multiple
           ref={inputRef}
           onChange={handleFileChange}
+          disabled={imageLoadingState || isEditMode}
         />
 
         {/* If no images, show upload button */}
@@ -124,9 +130,22 @@ function ImageUpload({
             htmlFor="image-upload"
             className="flex flex-col items-center justify-center h-32 cursor-pointer"
           >
-            <UploadCloudIcon className="w-10 h-10 text-muted-foreground mb-2" />
-            <span>Drag & drop or click to upload images</span>
+            {isEditMode ? (
+              <ImageOff className="w-10 h-10 text-muted-foreground mb-2" />
+            ) : (
+              <UploadCloudIcon className="w-10 h-10 text-muted-foreground mb-2" />
+            )}
+            <span>
+              {isEditMode
+                ? "Edit Product Not Upload Image"
+                : "Drag & drop or click to upload images"}
+            </span>
           </label>
+        ) : imageLoadingState ? (
+          <div className="flex items-center justify-center h-32">
+            <FileIcon className="w-10 h-10 text-muted-foreground" />
+            <span className="text-2xl font-semibold ">Loading...</span>
+          </div>
         ) : (
           <div className="flex flex-col gap-3">
             {/* Preview Images */}

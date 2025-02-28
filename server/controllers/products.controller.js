@@ -15,9 +15,10 @@ export const handleImageUpload = async (req, res) => {
                 return await ImageUpload(url);
             })
         );
+        const uploadedImagesUrl = uploadedImages.map((image) => image.url);
         res.status(200).json({
             message: "Images uploaded successfully",
-            results: uploadedImages,
+            results: uploadedImagesUrl,
         });
     } catch (e) {
         console.log(e);
@@ -39,7 +40,7 @@ export const addProduct = async (req, res) => {
         if (!image || !title || !description || !category || !brand || !price || !salePrice || !totalStock) {
             return res.status(400).json({ message: 'Please fill all required fields' });
         }
-        const newProduct = new productModel(
+        const newProduct = new productModel({
             image,
             title,
             description,
@@ -48,12 +49,12 @@ export const addProduct = async (req, res) => {
             price,
             salePrice,
             totalStock
-        );
+        });
         await newProduct.save();
         if (!newProduct) {
-            return res.status(400).json({ message: 'Product not added and server error',product: newProduct});
+            return res.status(400).json({ message: 'Product not added and server error'});
         }
-        res.status(201).json({ message: 'Product added successfully' });
+        res.status(201).json({ message: 'Product added successfully', product: newProduct });
     } catch (e) {
         console.log(e);
         res.status(500).json({ message: 'Server Error' });
@@ -83,6 +84,7 @@ export const editProduct = async (req, res) => {
             price,
             salePrice,
             totalStock } = req.body;
+            console.log(req.body);
         if (!image || !title || !description || !category || !brand || !price || !salePrice || !totalStock) {
             return res.status(400).json({ message: 'Please fill all required fields' });
         }
@@ -119,21 +121,3 @@ export const deleteProduct = async (req, res) => {
     }
 }
 
-// here is middleware is chack if request for admin or not 
-
-export const AdminAuthMiddleware = async (req, res, next) => {
-    const token = req.cookies.token;
-    if (!token) return res.status(401).send({ message: "Unauthorized" });
-
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await userSchema.findById(decoded.id);
-        if (!user) return res.status(404).send({ message: "User not found" });
-        if (user.roll !== "admin") return res.status(404).send({ message: "Can not access this Unauthenticated" });
-        req.user = user;
-        next();
-    }
-    catch (err) {
-        return res.status(401).send({ message: "Invalid token" });
-    }
-}

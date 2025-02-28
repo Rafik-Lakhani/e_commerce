@@ -13,6 +13,7 @@ export const addNewProduct = createAsyncThunk("/products/addnewproduct", async (
         withCredentials: true,
     });
     if (response.status == 200 || response.status == 201) {
+        console.log(response);
         return response.data.product;
     } else {
         return response.data.message;
@@ -20,6 +21,7 @@ export const addNewProduct = createAsyncThunk("/products/addnewproduct", async (
 });
 
 export const editProduct = createAsyncThunk("/products/editproduct", async ({ id, formData }) => {
+    console.log(formData,"in slice");
     const response = await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/admin/products/edit/${id}`, formData, {
         withCredentials: true,
     });
@@ -60,7 +62,7 @@ export const AdminProdcutSlice = createSlice({
     },
     extraReducers: (builder) => {
         // here add products case
-        builder.addCase(addNewProduct.padding, (state, action) => {
+        builder.addCase(addNewProduct.pending, (state, action) => {
             state.isLoading = true;
         }).addCase(addNewProduct.fulfilled, (state, action) => {
             if (typeof action.payload == "object") {
