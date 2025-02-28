@@ -6,6 +6,7 @@ function CommonForm({
   setFormData,
   onSubmit,
   buttonText,
+  required=false,
 }) {
   function renderInputsByComponentType(getControlType) {
     let element = null;
@@ -25,6 +26,7 @@ function CommonForm({
                 [getControlType.name]: e.target.value,
               })
             }
+            required={required}
             style={{ width: "100%", padding: "8px", border: "1px solid #ccc", borderRadius: "4px" }}
           />
         );
@@ -40,6 +42,7 @@ function CommonForm({
                 [getControlType.name]: e.target.value,
               })
             }
+            required={required}
             style={{ width: "100%", padding: "8px", border: "1px solid #ccc", borderRadius: "4px" }}
           >
             <option value="" disabled>{getControlType.placeholder}</option>
@@ -66,6 +69,7 @@ function CommonForm({
                 [getControlType.name]: e.target.value,
               });
             }}
+            required={required}
             style={{ width: "100%", padding: "8px", border: "1px solid #ccc", borderRadius: "4px" }}
           />
         );
@@ -84,6 +88,7 @@ function CommonForm({
                 [getControlType.name]: e.target.value,
               });
             }}
+            required={required}
             style={{ width: "100%", padding: "8px", border: "1px solid #ccc", borderRadius: "4px" }}
           />
         );
@@ -102,7 +107,8 @@ function CommonForm({
           {renderInputsByComponentType(control)}
         </div>
       ))}
-      <button type="submit" style={{ padding: "10px", backgroundColor: "blue", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}>
+      <button type="submit" style={{ padding: "10px", backgroundColor: "blue", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}
+      >
         {buttonText || "Submit"}
       </button>
     </form>

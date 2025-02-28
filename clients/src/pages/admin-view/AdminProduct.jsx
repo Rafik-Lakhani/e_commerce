@@ -20,7 +20,7 @@ function AdminProduct() {
   const [currentEditProductId, setCurrentEditProductId] = useState(null);
   const { productList } = useSelector((state) => state.adminProdcuts);
   const initailFormData = {
-    image: null,
+    image: [],
     title: "",
     description: "",
     category: "",
@@ -35,6 +35,17 @@ function AdminProduct() {
   console.log(formData, productList, uploadImageUrl);
   function onSubmit(e) {
     e.preventDefault();
+
+    const isAnyFildEmty = Object.keys(formData).map((key) => {
+      if (formData[key] === "") {
+        return true;
+      }
+    });
+    if (isAnyFildEmty.includes(true)) {
+      toast.error("Please fill all the fields");
+      return;
+    }
+
     if (currentEditProductId !== null) {
       dispatch(
         editProduct({ id: currentEditProductId, formData: formData })
