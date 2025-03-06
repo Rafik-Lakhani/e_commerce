@@ -8,6 +8,6 @@ router.post('/upload-image', AdminAuthMiddleware, upload.array("my_files", 4), h
 router.post('/add', AdminAuthMiddleware, addProduct);
 router.put("/edit/:id", AdminAuthMiddleware, editProduct);
 router.delete("/delete/:id", AdminAuthMiddleware, deleteProduct);
-router.get('/getAllProducts', AdminAuthMiddleware, fetchAllProducts);
+router.get('/getAllProducts', fetchAllProducts);
 
 export default router;
