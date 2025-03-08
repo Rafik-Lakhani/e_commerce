@@ -29,8 +29,11 @@ function MenuItems({ className = "" }) {
 
 function ShoppingHeader() {
   const [openSideMenu, setOpenSideMenu] = useState(false);
-  const useName = useSelector((state) => state.auth.user.userName);
-  const userFirstLetter = useName[0];
+  const useName = useSelector((state) => state.auth.user?.userName);
+  console.log(useName);
+  if(useName){
+    const userFirstLetter = useName[0];
+  }
   return (
     <header className="sticky top-0 z-40 w-full border-b border-gray-300 bg-white">
       <div className="flex h-16 items-center justify-between px-4 md:px-6">
@@ -60,7 +63,7 @@ function ShoppingHeader() {
                 to="/auth/profile"
                 className="text-gray-800 hover:text-gray-800 rounded-full bg-gray-200 p-1.5 px-3.5 ml-3 font-medium capitalize text-2xl"
               >
-                {userFirstLetter}
+                {useName[0]? useName[0].toUpperCase() : ''}
               </Link>
             ) : (
               <Link
@@ -131,7 +134,7 @@ function ShoppingHeader() {
                     to="/auth/profile"
                     className="text-gray-800 hover:text-gray-800 rounded-full bg-gray-200 p-1.5 px-3.5 ml-3 font-medium capitalize text-2xl"
                   >
-                    {userFirstLetter}
+                    {useName[0]? useName[0].toUpperCase() : ''}
                   </Link>
                 ) : (
                   <Link

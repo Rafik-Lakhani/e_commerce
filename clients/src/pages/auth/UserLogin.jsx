@@ -20,7 +20,6 @@ function UserLogin() {
       if (typeof data.payload === "string") {
         toast.error(data);
       } else {
-        navigate("/shop/home");
         toast.success("Login Successfully");
       }
     });

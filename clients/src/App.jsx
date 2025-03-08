@@ -1,4 +1,4 @@
-import { Routes, Route,useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import AuthLayout from "./components/auth/AuthLayout";
 import AuthLogin from "./pages/auth/UserLogin";
 import AuthRegister from "./pages/auth/UserRegister";
@@ -19,6 +19,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { checkAuth } from "./store/auth-slice.js";
 import { toast } from "react-toastify";
+import ShoppingProduct from "./pages/shopping-view/ShoppingProduct.jsx";
 
 function App() {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ function App() {
   useEffect(() => {
     dispatch(checkAuth()).then((data) => {
       if (typeof data.payload === "string") {
-        navigate("/auth/login");
+        // navigate("/auth/login");
         return;
       }
     });
@@ -34,7 +35,7 @@ function App() {
   const { isAuthenticated, user, isLoading } = useSelector(
     (state) => state.auth
   );
-  if (isLoading){
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen w-screen">
         <h1>Loading....</h1>
@@ -70,16 +71,12 @@ function App() {
           <Route path="orders" element={<AdminOrder />} />
           <Route path="features" element={<AdminFeatures />} />
         </Route>
-        <Route
-          path="/shop"
-          element={
-            <CheckUserAuth isAuthenticated={isAuthenticated} user={user}>
-              <ShoppingLayout />
-            </CheckUserAuth>
-          }
-        >
+        <Route path="/shop" element={<ShoppingLayout />}>
           <Route path="home" element={<ShoppingHome />} />
           <Route path="listing" element={<ShoppingProductList />} />
+          <Route path="cart" element={<ShoppingCheckOut />} />
+          <Route path="search" element={<ShoppingCheckOut />} />
+          <Route path="product/:id" element={<ShoppingProduct />} />
           <Route path="checkout" element={<ShoppingCheckOut />} />
           <Route path="account" element={<ShoppingAccount />} />
           <Route path="*" element={<NotFound />} />

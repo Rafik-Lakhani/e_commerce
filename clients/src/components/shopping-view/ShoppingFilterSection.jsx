@@ -8,7 +8,10 @@ function ShoppingFilterSection({
   setCategoryFilter,
 }) {
   return (
-    <div className="flex flex-col items-start">
+    <div className="flex flex-col items-start
+      bg-white p-4 rounded-lg shadow-md min-w-[250px] max-w-[300px]
+      
+    ">
       <span className="flex text-sm font-semibold text-gray-700 mb-4">
         <FilterIcon />
         Filter by Category

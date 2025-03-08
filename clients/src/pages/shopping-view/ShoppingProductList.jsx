@@ -4,20 +4,13 @@ import { Link } from "react-router-dom";
 import { fetchAllProducts } from "../../store/products-slice";
 import ShoppingCards from "../../components/shopping-view/ShoppingCards";
 import ShoppingFilterSection from "../../components/shopping-view/ShoppingFilterSection";
+import { Categoties } from "../../config/CategoriesConfig.js";
 
 function addToCart(product) {
   console.log("Product added to cart", product);
 }
 
-const Categoties = [
-  { id: "school-bag", label: "School Bag" },
-  { id: "laptop-bag", label: "Laptop Bag" },
-  { id: "traveling-bag", label: "Traveling Bag" },
-  { id: "ladies-purse", label: "Ladies Purse" },
-  { id: "college-bag", label: "College Bag" },
-  { id: "kids-bag", label: "Kids Bag" },
-  { id: "office-bag", label: "Office Bag" },
-];
+
 
 function ShoppingProductList() {
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -41,7 +34,7 @@ function ShoppingProductList() {
   }, [categoryFilter, products]);
 
   return (
-    <div className="container mx-auto p-4 md:p-6 lg:p-8 flex flex-row justify-between">
+    <div className="container mx-auto p-4 md:p-6 lg:p-8 flex flex-row justify-between gap-4">``
       <div className="flex flex-col items-center mb-4">
         <ShoppingFilterSection
           Categoties={Categoties}

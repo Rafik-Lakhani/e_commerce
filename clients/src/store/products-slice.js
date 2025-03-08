@@ -3,7 +3,7 @@ import axios from "axios";
 import { data } from "react-router-dom";
 
 const initialState = {
-    isLoading: false,
+    isLoading: true,
     productList: [],
 }
 
