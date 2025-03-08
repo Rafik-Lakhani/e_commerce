@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { Star, ShoppingCart } from "lucide-react";
+import { Star, ShoppingCart, Minus, Plus } from "lucide-react";
 
-function ShoppingProductDetail({ product, addToCart }) {
+function ShoppingProductDetail({ product, addToCart, quantity, setQuantity }) {
   const [displayImage, setDisplayImage] = useState(product.image[0]);
 
   useEffect(() => {
     setDisplayImage(product.image[0]);
   }, [product.image]);
+  useEffect(() => {
+    const cartItem = JSON.parse(localStorage.getItem("addTOCartProduct")) || [];
+    const productIndex = cartItem.findIndex((item) => item.id === product.id);
+    if (productIndex > -1) {
+      setQuantity(cartItem[productIndex].quantity);
+    }
+  }, []);
 
   let stockStatus = "In Stock";
   let stockColor = "bg-green-600";
@@ -18,6 +25,14 @@ function ShoppingProductDetail({ product, addToCart }) {
     stockColor = "bg-red-600";
   }
 
+  const handleQuantityChange = (type) => {
+    if (type === "increase" && quantity < product.totalStock) {
+      setQuantity(quantity + 1);
+    } else if (type === "decrease" && quantity > 1) {
+      setQuantity(quantity - 1);
+    }
+  };
+
   return (
     <div className="min-h-screen py-10 bg-gray-50 flex justify-center px-4 sm:px-6 md:px-8">
       <div className="max-w-6xl w-full bg-white p-6 sm:p-8 rounded-lg shadow-lg border border-gray-200">
@@ -28,7 +43,7 @@ function ShoppingProductDetail({ product, addToCart }) {
               <img
                 src={displayImage}
                 alt={product.title}
-                className="w-full h-80 sm:h-96 object-cover"
+                className="w-full h-80 sm:h-96 object-contain"
               />
             </div>
             <span
@@ -36,7 +51,7 @@ function ShoppingProductDetail({ product, addToCart }) {
             >
               {stockStatus}
             </span>
-            <div className="flex gap-2 sm:gap-3 mt-4">
+            <div className="flex gap-2 sm:gap-3 mt-4 overflow-x-auto">
               {product.image.map((img, index) => (
                 <img
                   key={index}
@@ -52,33 +67,72 @@ function ShoppingProductDetail({ product, addToCart }) {
           {/* Details Section */}
           <div className="flex flex-col justify-between w-full">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 leading-tight">{product.title}</h1>
-              <p className="text-gray-600 text-md sm:text-lg mt-2">Category: {product.category}</p>
-              {product.brand && <p className="text-gray-600 text-md sm:text-lg">Brand: {product.brand}</p>}
-              
+              <h1 className="text-3xl font-bold text-gray-900 leading-tight">
+                {product.title}
+              </h1>
+              <p className="text-gray-600 text-md sm:text-lg mt-2">
+                Category: {product.category}
+              </p>
+              {product.brand && (
+                <p className="text-gray-600 text-md sm:text-lg">
+                  Brand: {product.brand}
+                </p>
+              )}
+
               <div className="flex items-center gap-3 my-4">
-                <span className="text-3xl font-semibold text-red-600">${product.salePrice}</span>
-                <span className="text-gray-500 text-xl line-through">${product.price}</span>
+                <span className="text-3xl font-semibold text-red-600">
+                  ${product.salePrice}
+                </span>
+                <span className="text-gray-500 text-xl line-through">
+                  ${product.price}
+                </span>
               </div>
-              
+
               <div className="flex items-center gap-1 text-yellow-500">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} fill={i < product.averageReview ? "#facc15" : "none"} />
+                  <Star
+                    key={i}
+                    fill={i < product.averageReview ? "#facc15" : "none"}
+                  />
                 ))}
-                <span className="text-gray-600 text-md sm:text-lg ml-2">({product.averageReview} Reviews)</span>
+                <span className="text-gray-600 text-md sm:text-lg ml-2">
+                  ({product.averageReview} Reviews)
+                </span>
               </div>
-              
-              <p className="mt-4 text-gray-700 leading-relaxed text-md sm:text-lg">{product.description}</p>
+
+              <p className="mt-4 text-gray-700 leading-relaxed text-md sm:text-lg">
+                {product.description}
+              </p>
+            </div>
+
+            {/* Quantity Selector */}
+            <div className="flex items-center gap-4 mt-6">
+              <button
+                className="p-2 bg-gray-300 rounded-md disabled:opacity-50"
+                onClick={() => handleQuantityChange("decrease")}
+                disabled={quantity <= 1}
+              >
+                <Minus size={18} />
+              </button>
+              <span className="text-lg font-semibold">{quantity}</span>
+              <button
+                className="p-2 bg-gray-300 rounded-md disabled:opacity-50"
+                onClick={() => handleQuantityChange("increase")}
+                disabled={quantity >= product.totalStock}
+              >
+                <Plus size={18} />
+              </button>
             </div>
 
             {/* Add to Cart Button */}
             <div className="mt-6">
               <button
                 className="w-full flex justify-center items-center gap-2 bg-blue-600 text-white text-lg px-6 py-3 rounded-md hover:bg-blue-700 transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={() => addToCart(product._id)}
+                onClick={() => addToCart(product._id, quantity)}
                 disabled={product.totalStock <= 0}
               >
-                <ShoppingCart /> {product.totalStock > 0 ? "Add to Cart" : "Out of Stock"}
+                <ShoppingCart />{" "}
+                {product.totalStock > 0 ? "Add to Cart" : "Out of Stock"}
               </button>
             </div>
           </div>
