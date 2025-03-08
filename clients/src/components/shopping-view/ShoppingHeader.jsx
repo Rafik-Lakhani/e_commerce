@@ -9,7 +9,7 @@ import { ShoppingCart, User, MenuIcon, XIcon } from "lucide-react";
 function MenuItems({ className = "" }) {
   return (
     <nav className={`flex gap-10 text-lg font-medium ${className}`}>
-      <Link to="/shop/home">
+      <Link to="/">
         <span className="text-gray-600 hover:text-gray-800">Home</span>
       </Link>
       <Link to="/shop/listing">
@@ -30,10 +30,6 @@ function MenuItems({ className = "" }) {
 function ShoppingHeader() {
   const [openSideMenu, setOpenSideMenu] = useState(false);
   const useName = useSelector((state) => state.auth.user?.userName);
-  console.log(useName);
-  if(useName){
-    const userFirstLetter = useName[0];
-  }
   return (
     <header className="sticky top-0 z-40 w-full border-b border-gray-300 bg-white">
       <div className="flex h-16 items-center justify-between px-4 md:px-6">

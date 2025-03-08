@@ -4,7 +4,8 @@ import { dbConnection } from './config/db.connection.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import authRouter from './routes/auth.routes.js';
-import adminProductsRouter from './routes/products.routes.js';
+import adminProductsRouter from './routes/admin.routes.js';
+import shopRouter from './routes/shop.routes.js'
 
 
 const app = express();
@@ -22,6 +23,7 @@ app.use(cors({
 }));
 app.use('/api/auth', authRouter);
 app.use('/api/admin/products', adminProductsRouter)
+app.use('/api/shop',shopRouter);
 
 
 

@@ -1,9 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Navigate, useParams } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { fetchAllProducts } from "../../store/products-slice";
-import { useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchProductDetails } from "../../store/user-product-slice";
 import ShoppingProductDetail from "../../components/shopping-view/ShoppingProductDetail";
 import ShoppingRelatedProducts from "../../components/shopping-view/ShoppingRelatedProducts";
 import ShoppingProductReviews from "../../components/shopping-view/ShoppingProductReviews";
@@ -11,38 +9,44 @@ import ShoppingProductReviews from "../../components/shopping-view/ShoppingProdu
 function ShoppingProduct() {
   const { id } = useParams();
   const dispatch = useDispatch();
-  if (!id) return <Navigate to="/shop/home" />;
 
-  // fetch product details from API
-  useEffect(() => {
-    dispatch(fetchAllProducts());
-  }, []);
-
-  const addToCart = (ProductId)=>{
-    console.log("Add to cart",ProductId);
+  if (!id) {
+    return <Navigate to="/" />;
   }
 
-  const { productList, isLoading } = useSelector(
-    (state) => state.adminProdcuts
-  );
-  if (isLoading) return <div>Loading...</div>;
-  console.log(productList);
+  // Fetch product details from API
+  useEffect(() => {
+    console.log("Fetching Product ID:", id);
+    dispatch(fetchProductDetails(id));
+  }, [id, dispatch]);
 
-  const product = productList.find((p) => p._id === id);
-  const relatedProductList = productList.filter(
-    (p) => p.category === product.category && p._id !== product._id
-  );
-  return product ? (
+  const addToCart = (productId) => {
+    console.log("Add to cart:", productId);
+  };
+
+  const {productDetails,relatedProducts,isLoading,error} = useSelector((state) => state.userProdcuts);
+  console.log(productDetails, relatedProducts, isLoading, error);
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
+
+  return productDetails || relatedProducts ? (
     <div className="flex flex-col items-center justify-center m-auto">
-      <div>
-        <ShoppingProductDetail product={product} addToCart={addToCart} />
-      </div>
-      <div>
-        <ShoppingRelatedProducts relatedProductList={relatedProductList} addToCart={addToCart}/>
-      </div>
-      <div className="w-full flex justify-start items-start">
-        <ShoppingProductReviews product={product} />
-      </div>
+      {productDetails && (
+        <div className="w-full max-w-4xl">
+          <ShoppingProductDetail product={productDetails} addToCart={addToCart} />
+        </div>
+      )}
+      {relatedProducts?.length > 0 && (
+        <div className="w-full max-w-6xl">
+          <ShoppingRelatedProducts relatedProductList={relatedProducts} addToCart={addToCart} />
+        </div>
+      )}
+      {productDetails && (
+        <div className="w-full flex justify-start items-start">
+          <ShoppingProductReviews product={productDetails} />
+        </div>
+      )}
     </div>
   ) : (
     <Navigate to="/shop/home" />
