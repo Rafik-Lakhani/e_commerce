@@ -1,4 +1,4 @@
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import AuthLayout from "./components/auth/AuthLayout";
 import AuthLogin from "./pages/auth/UserLogin";
 import AuthRegister from "./pages/auth/UserRegister";
@@ -22,7 +22,7 @@ import { toast } from "react-toastify";
 import ShoppingProduct from "./pages/shopping-view/ShoppingProduct.jsx";
 
 function App() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(checkAuth()).then((data) => {
@@ -46,6 +46,7 @@ function App() {
     <div className="flex flex-col overflow-hidden bg-white">
       <h1></h1>
       <Routes>
+        <Route path="/" element={<Navigate to="/shop/home" replace />} />
         <Route
           path="/auth"
           element={

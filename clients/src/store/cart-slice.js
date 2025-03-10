@@ -16,9 +16,11 @@ export const addToCart = createAsyncThunk(
                 userId,
                 productId,
                 quantity,
+            },{
+                withCredentials: true,
             }
         );
-
+        console.log(response);
         return response.data;
     }
 );
@@ -27,7 +29,10 @@ export const fetchCartItems = createAsyncThunk(
     "cart/fetchCartItems",
     async (userId) => {
         const response = await axios.get(
-            `${import.meta.env.VITE_BACKEND_URL}/api/shop/cart/get/${userId}`
+            `${import.meta.env.VITE_BACKEND_URL}/api/shop/cart/get/${userId}`,
+            {
+                withCredentials: true,
+            }
         );
 
         return response.data;
@@ -38,7 +43,10 @@ export const deleteCartItem = createAsyncThunk(
     "cart/deleteCartItem",
     async ({ userId, productId }) => {
         const response = await axios.delete(
-            `${import.meta.env.VITE_BACKEND_URL}/api/shop/cart/delete/${userId}/${productId}`
+            `${import.meta.env.VITE_BACKEND_URL}/api/shop/cart/delete/${userId}/${productId}`,
+            {
+                withCredentials: true,
+            }
         );
 
         return response.data;
@@ -54,6 +62,8 @@ export const updateCartQuantity = createAsyncThunk(
                 userId,
                 productId,
                 quantity,
+            },{
+                withCredentials: true,
             }
         );
 
@@ -64,7 +74,16 @@ export const updateCartQuantity = createAsyncThunk(
 const shoppingCartSlice = createSlice({
     name: "shoppingCart",
     initialState,
-    reducers: {},
+    reducers: {
+        getLocalStorageItem: function (state,action){
+            state.cartItems = JSON.parse(localStorage.getItem('addTOCartProduct'));
+            console.log(state.cartItems);
+        },
+        updateLocalStorageItem: function (state,action){
+            state.cartItems=action.payload.cartItems;
+            localStorage.setItem('addTOCartProduct', JSON.stringify(action.payload.cartItems));
+        }
+    },
     extraReducers: (builder) => {
         builder
             .addCase(addToCart.pending, (state) => {
@@ -72,12 +91,14 @@ const shoppingCartSlice = createSlice({
             })
             .addCase(addToCart.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.cartItems = state.cartItems.push(action.payload.product);
+                // state.cartItems = action.payload.product;
             })
-            .addCase(addToCart.rejected, (state) => {
+            .addCase(addToCart.rejected, (state,action) => {
                 state.isLoading = false;
                 state.cartItems = [];
-                state.error = action.error.message;
+                console.log(error);
+                // state.error = action.payload.error.message;
+                console.error(action.payload);
                 console.error(state.error);
             });
 
@@ -88,12 +109,14 @@ const shoppingCartSlice = createSlice({
         })
             .addCase(fetchCartItems.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.cartItems = action.payload.product;
+                console.log(action.payload.product.map(product => product.products));
+                // state.cartItems = action.payload.product.map(product =>product.products);
+                state.cartItems = action.payload.product.map(product => product.products)[0];
             })
-            .addCase(fetchCartItems.rejected, (state) => {
+            .addCase(fetchCartItems.rejected, (state,action) => {
                 state.isLoading = false;
                 state.cartItems = [];
-                state.error = action.error.message;
+                state.error = action.payload;
                 console.error(state.error);
             });
 
@@ -103,18 +126,14 @@ const shoppingCartSlice = createSlice({
         })
             .addCase(updateCartQuantity.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.cartItems = action.payload.data;
-                state.cartItems = state.cartItems.map((cartItem) => {
-                    if (cartItem.productId == action.payload.product.productId) {
-                        cartItem.quantity = action.payload.product.quantity;
-                        return cartItem;
-                    } else return cartItem;
-                })
+                // state.cartItems = action.payload.data;
+                // console.log(action.payload)
+                // state.cartItems = action.payload.product.products.map(product =>product.products);
             })
-            .addCase(updateCartQuantity.rejected, (state) => {
+            .addCase(updateCartQuantity.rejected, (state,action) => {
                 state.isLoading = false;
                 state.cartItems = [];
-                state.error = action.error.message;
+                state.error = action.payload.error.message;
                 console.error(state.error);
             });
 
@@ -123,15 +142,17 @@ const shoppingCartSlice = createSlice({
         })
             .addCase(deleteCartItem.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.cartItems = state.cartItems.map((cartItem) => { if (cartItem.productId !== action.payload.product.productId) { return cartItem; } });
+                // state.cartItems = state.cartItems.map((cartItem) => { if (cartItem.productId !== action.payload.product.productId) { return cartItem; } });
             })
-            .addCase(deleteCartItem.rejected, (state) => {
+            .addCase(deleteCartItem.rejected, (state,action) => {
                 state.isLoading = false;
                 state.cartItems = [];
-                state.error = action.error.message;
+                state.error = action.payload.error.message;
                 console.error(state.error);
             });
     },
 });
+
+export const { getLocalStorageItem,updateLocalStorageItem } = shoppingCartSlice.actions;
 
 export default shoppingCartSlice.reducer;

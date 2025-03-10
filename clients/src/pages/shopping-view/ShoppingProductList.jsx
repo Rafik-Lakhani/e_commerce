@@ -4,18 +4,58 @@ import { fetchUserProducts } from "../../store/user-product-slice.js";
 import ShoppingCards from "../../components/shopping-view/ShoppingCards";
 import ShoppingFilterSection from "../../components/shopping-view/ShoppingFilterSection";
 import { Categoties } from "../../config/CategoriesConfig.js";
-
-function addToCart(product) {
-  console.log("Product added to cart", product);
-}
-
-
+import { addToCart as AddProductInCart } from "../../store/cart-slice.js";
+import { toast } from "react-toastify";
 
 function ShoppingProductList() {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [categoryFilter, setCategoryFilter] = useState([]);
   const dispatch = useDispatch();
-  const {products,isLoading,error} = useSelector((state) => state.userProdcuts);
+  const { products, isLoading, error } = useSelector(
+    (state) => state.userProdcuts
+  );
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
+
+  function addToCart(productId) {
+    console.log("Product added to cart", productId);
+    if (isAuthenticated) {
+      localStorage.removeItem("addTOCartProduct");
+      dispatch(
+        AddProductInCart({
+          userId: user._id,
+          productId: productId,
+          quantity: 1,
+        })
+      )
+        .then((data) => {
+          toast.success("Product added successfully");
+        })
+        .catch((error) => {
+          console.log("Error adding product to cart", error);
+          toast.error("Failed to add product to cart");
+        });
+    } else {
+      const alreadyProduct =
+        JSON.parse(localStorage.getItem("addTOCartProduct")) || [];
+
+      // Find the index of the existing product in the cart
+      const productIndex = alreadyProduct.findIndex(
+        (item) => item.productId === productId
+      );
+
+      if (productIndex !== -1) {
+        // If product exists, update its quantity
+        alreadyProduct[productIndex].quantity = 1;
+      } else {
+        // If product is not in cart, add new entry
+        alreadyProduct.push({ productId, quantity:1 });
+      }
+
+      // Save updated cart data in localStorage
+      localStorage.setItem("addTOCartProduct", JSON.stringify(alreadyProduct));
+      toast.success("Product added successfully");
+    }
+  }
 
   useEffect(() => {
     dispatch(fetchUserProducts());
@@ -34,7 +74,8 @@ function ShoppingProductList() {
   if (error) return <div>{error}</div>;
 
   return (
-    <div className="container mx-auto p-4 md:p-6 lg:p-8 flex flex-row justify-between gap-4">``
+    <div className="container mx-auto p-4 md:p-6 lg:p-8 flex flex-row justify-between gap-4">
+      ``
       <div className="flex flex-col items-center mb-4">
         <ShoppingFilterSection
           Categoties={Categoties}

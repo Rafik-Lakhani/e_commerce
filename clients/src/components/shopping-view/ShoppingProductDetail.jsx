@@ -110,7 +110,6 @@ function ShoppingProductDetail({ product, addToCart, quantity, setQuantity }) {
               <button
                 className="p-2 bg-gray-300 rounded-md disabled:opacity-50"
                 onClick={() => handleQuantityChange("decrease")}
-                disabled={quantity <= 1}
               >
                 <Minus size={18} />
               </button>
@@ -118,7 +117,6 @@ function ShoppingProductDetail({ product, addToCart, quantity, setQuantity }) {
               <button
                 className="p-2 bg-gray-300 rounded-md disabled:opacity-50"
                 onClick={() => handleQuantityChange("increase")}
-                disabled={quantity >= product.totalStock}
               >
                 <Plus size={18} />
               </button>

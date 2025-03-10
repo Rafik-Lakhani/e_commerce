@@ -34,28 +34,28 @@ export const fetchSingleProduct = async (req, res) => {
 export const addToCart = async (req, res) => {
     try {
         const { userId, productId, quantity } = req.body;
-        if (!userId || !productId || quantity) return res.status(404).json({ message: 'Invalid credentials' });
+        if (!userId || !productId || !quantity) return res.status(404).json({ message: 'Invalid credentials' });
         const product = await productModel.findById(productId);
         if (!product) return res.status(404).json({ message: 'Product not found' });
-        const isCartAvailable = CartModel.find({ userId: userId });
-        if (isCartAvailable) {
-            let existingProduct = CartModel.findOne({ userId: userId, 'products.productId': productId });
+        const isCartAvailable = await CartModel.find({ userId: userId });
+        if (isCartAvailable.length > 0){
+            let existingProduct = await CartModel.findOne({ userId: userId, 'products.productId': productId });
             if (existingProduct) {
-                existingProduct.products.forEach(p => {
-                    if (p.productId === productId) {
+                existingProduct?.products.forEach(p => {
+                    if (p.productId == productId) {
                         p.quantity += quantity;
-                        return res.status(200).json({ product: existingProduct.products });
+                        return res.status(200).json({ product: existingProduct });
                     }
-                });
+                }); 
             }
             else {
-                const updatedCart = CartModel.findByIdAndUpdate(isCartAvailable[0]._id, { $push: { products: { productId, quantity } } });
-                res.status(200).json({ product: updatedCart.products });
+                const updatedCart = await CartModel.findByIdAndUpdate(isCartAvailable[0]._id, { $push: { products: { productId, quantity } } });
+                res.status(200).json({ product: updatedCart });
             }
         } else {
             const newCart = new CartModel({ userId, products: [{ productId, quantity }] });
             await newCart.save();
-            res.status(200).json({ product: newCart.products });
+            res.status(200).json({ product: newCart });
         }
 
     } catch (e) {
@@ -71,8 +71,8 @@ export const fetchCartItems = async (req, res) => {
         const { id } = req.params;
         if (!id) return res.status(404).json({ message: 'Invalid credentials' });
         const cartItems = await CartModel.find({ userId: id });
-        if (!cartItems) return res.status(404).json({ message: 'Cart is empty' });
-        res.status(200).json({ products: cartItems[0].products });
+        if (cartItems.length==0) return res.status(404).json({ message: 'Cart is empty' });
+        res.status(200).json({ product: cartItems });
     } catch (e) {
         console.log(e);
         res.status(500).json({ message: 'Server Error' });
@@ -84,7 +84,7 @@ export const deleteCartItems = async (req, res) => {
         const {userId,productId}=req.params;
         if(!userId ||!productId) return res.status(404).json({ message: 'Invalid credentials' });
         const cartItems=await CartModel.findOneAndUpdate({userId:userId},{$pull:{products:{productId:productId}}},{new:true});
-        res.status(200).json({product:cartItems.products});
+        res.status(200).json({product:cartItems});
     }catch(e){
         console.log(e);
         res.status(500).json({ message: 'Server Error' });
@@ -96,7 +96,7 @@ export const updateCartQuantity = async (req, res) => {
         const {userId, productId, quantity}=req.body;
         if(!userId ||!productId ||!quantity) return res.status(404).json({ message: 'Invalid credentials' });
         const cartItems=await CartModel.findOneAndUpdate({userId:userId, 'products.productId': productId},{$set: {'products.$.quantity': quantity}},{new:true});
-        res.status(200).json({product:cartItems.products});
+        res.status(200).json({product:cartItems});
     }catch(e){
         console.log(e);
         res.status(500).json({ message: 'Server Error' });

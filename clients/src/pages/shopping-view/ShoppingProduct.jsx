@@ -5,6 +5,7 @@ import { fetchProductDetails } from "../../store/user-product-slice";
 import ShoppingProductDetail from "../../components/shopping-view/ShoppingProductDetail";
 import ShoppingRelatedProducts from "../../components/shopping-view/ShoppingRelatedProducts";
 import ShoppingProductReviews from "../../components/shopping-view/ShoppingProductReviews";
+import { addToCart as AddProductInCart, fetchCartItems } from "../../store/cart-slice.js";
 import { toast } from "react-toastify";
 
 function ShoppingProduct() {
@@ -14,7 +15,7 @@ function ShoppingProduct() {
     (state) => state.userProdcuts
   );
   console.log(productDetails, relatedProducts, isLoading, error);
-  const [quantity, setQuantity] = useState(0);
+  const [quantity, setQuantity] = useState(1);
   const { user, isAuthenticated } = useSelector((state) => state.auth);
 
   if (!id) {
@@ -26,12 +27,26 @@ function ShoppingProduct() {
     console.log("Fetching Product ID:", id);
     dispatch(fetchProductDetails(id));
   }, [id, dispatch]);
-  
 
   const addToCart = (productId) => {
     console.log("Add to cart:", productId);
     if (isAuthenticated) {
-      // Add to cart logic for authenticated users
+      localStorage.removeItem("addTOCartProduct");
+      dispatch(
+        AddProductInCart({
+          userId: user._id,
+          productId: productId,
+          quantity: quantity,
+        })
+      )
+        .then((data) => {
+          dispatch(fetchCartItems(user._id));
+          toast.success("Product added successfully");
+        })
+        .catch((error) => {
+          console.log("Error adding product to cart", error);
+          toast.error("Failed to add product to cart");
+        });
     } else {
       const alreadyProduct =
         JSON.parse(localStorage.getItem("addTOCartProduct")) || [];
