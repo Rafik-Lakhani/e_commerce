@@ -7,6 +7,7 @@ import ShoppingRelatedProducts from "../../components/shopping-view/ShoppingRela
 import ShoppingProductReviews from "../../components/shopping-view/ShoppingProductReviews";
 import { addToCart as AddProductInCart, fetchCartItems } from "../../store/cart-slice.js";
 import { toast } from "react-toastify";
+import Loading from "../../components/common/Loading.jsx";
 
 function ShoppingProduct() {
   const { id } = useParams();
@@ -70,7 +71,7 @@ function ShoppingProduct() {
     }
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <Loading/>;
   if (error) return <div className="text-red-500">{error}</div>;
 
   return productDetails || relatedProducts ? (

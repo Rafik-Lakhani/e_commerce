@@ -10,6 +10,7 @@ function ShoppingLayout() {
       <main className="flex flex-col w-full">
         <Outlet />
       </main>
+      
     </div>
   )
 }

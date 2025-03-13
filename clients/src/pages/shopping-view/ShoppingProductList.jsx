@@ -6,6 +6,7 @@ import ShoppingFilterSection from "../../components/shopping-view/ShoppingFilter
 import { Categoties } from "../../config/CategoriesConfig.js";
 import { addToCart as AddProductInCart } from "../../store/cart-slice.js";
 import { toast } from "react-toastify";
+import Loading from "../../components/common/Loading.jsx";
 
 function ShoppingProductList() {
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -70,7 +71,7 @@ function ShoppingProductList() {
     }
     setFilteredProducts(filtered);
   }, [categoryFilter, products]);
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <Loading/>;
   if (error) return <div>{error}</div>;
 
   return (

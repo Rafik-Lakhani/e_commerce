@@ -35,7 +35,7 @@ function ShoppingHeader() {
       <div className="flex h-16 items-center justify-between px-4 md:px-6">
         <Link to="/" className="flex items-center gap-2">
           <Backpack className="w-10 h-10" />
-          <span className="font-bold text-2xl">HappBag</span>
+          <span className="font-bold text-2xl">HappyBag</span>
         </Link>
         <div className="hidden lg:block">
           <MenuItems />
@@ -56,7 +56,7 @@ function ShoppingHeader() {
             </Link>
             {useName ? (
               <Link
-                to="/auth/profile"
+                to="/shop/account"
                 className="text-gray-800 hover:text-gray-800 rounded-full bg-gray-200 p-1.5 px-3.5 ml-3 font-medium capitalize text-2xl"
               >
                 {useName[0]? useName[0].toUpperCase() : ''}
