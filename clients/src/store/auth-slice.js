@@ -44,7 +44,7 @@ export const checkAuth= createAsyncThunk("/auth/checkauth", async(formData)=>{
   }
 });
 
-export const logoutUser= createAsyncThunk("/auth/logout", async(formData)=>{
+export const logoutUser= createAsyncThunk("/auth/logout", async()=>{
   const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/auth/logout`,{
     withCredentials:true
   }).catch((err) =>{return err.response});
