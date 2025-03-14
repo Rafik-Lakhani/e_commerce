@@ -18,6 +18,6 @@ router.put('/cart/update-cart', authMiddleware, updateCartQuantity);
 router.get('/account/getaddress/:id', authMiddleware,getUserAddress);
 router.post('/account/adduseraddress',authMiddleware,addUserAddress);
 router.put('/account/update-address', authMiddleware, updateUserAddress);
-router.get('/account/delete-address/:userId/:addressId', authMiddleware, deleteUserAddress);
+router.delete('/account/delete-address/:userId/:addressId', authMiddleware, deleteUserAddress);
 
 export default router;

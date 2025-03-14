@@ -14,17 +14,24 @@ import {
 import { logoutUser } from "../../store/auth-slice";
 import { toast } from "react-toastify";
 import { useSelector, useDispatch } from "react-redux";
-import Loading from '../../components/common/Loading';
+import Loading from "../../components/common/Loading";
 import { Navigate } from "react-router-dom";
+import {
+  addressDelete,
+  fetchAddresses,
+  userAddAddress,
+  userEditAddress,
+} from "../../store/address-slice.js";
 
 const AccountPage = () => {
-  const [user, setUser] = useState(null);
+  // const [user, setUser] = useState(null);
   const [activePage, setActivePage] = useState("account");
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [editAddressId, setEditAddressId] = useState(null);
   const [addressForm, setAddressForm] = useState({
     type: "Home",
     street: "",
+    country: "",
     city: "",
     state: "",
     zipCode: "",
@@ -32,97 +39,8 @@ const AccountPage = () => {
   });
   const [formErrors, setFormErrors] = useState({});
   const dispatch = useDispatch();
-  // const {isLoading,user,isAuthenticated} = useSelector((state)=>state.auth);
-
-  // if (isLoading) return <Loading/>
-
-  const validateAddressForm = () => {
-    const errors = {};
-    if (!addressForm.street.trim())
-      errors.street = "Street address is required";
-    if (!addressForm.city.trim()) errors.city = "City is required";
-    if (!addressForm.state.trim()) errors.state = "State is required";
-    if (!addressForm.zipCode.trim()) errors.zipCode = "ZIP code is required";
-    else if (!/^\d{5}(-\d{4})?$/.test(addressForm.zipCode)) {
-      errors.zipCode = "Invalid ZIP code format";
-    }
-    return errors;
-  };
-
-  const handleAddressSubmit = (e) => {
-    e.preventDefault();
-    const errors = validateAddressForm();
-    if (Object.keys(errors).length === 0) {
-      if (editAddressId) {
-        // Update existing address
-        setUser((prev) => ({
-          ...prev,
-          addresses: prev.addresses.map((addr) =>
-            addr.id === editAddressId
-              ? { ...addressForm, id: editAddressId }
-              : addr
-          ),
-        }));
-      } else {
-        // Add new address
-        const newAddress = {
-          id: `addr${Date.now()}`,
-          ...addressForm,
-        };
-        setUser((prev) => ({
-          ...prev,
-          addresses: [...prev.addresses, newAddress],
-        }));
-      }
-      handleCloseForm();
-    } else {
-      setFormErrors(errors);
-    }
-  };
-
-  const handleEditAddress = (address) => {
-    setEditAddressId(address.id);
-    setAddressForm({
-      type: address.type,
-      street: address.street,
-      city: address.city,
-      state: address.state,
-      zipCode: address.zipCode,
-      isDefault: address.isDefault,
-    });
-    setShowAddressForm(true);
-  };
-
-  const handleCloseForm = () => {
-    setShowAddressForm(false);
-    setEditAddressId(null);
-    setFormErrors({});
-    setAddressForm({
-      type: "Home",
-      street: "",
-      city: "",
-      state: "",
-      zipCode: "",
-      isDefault: false,
-    });
-  };
-
-  const handleDeleteAddress = (addressId) => {
-    setUser((prev) => ({
-      ...prev,
-      addresses: prev.addresses.filter((addr) => addr.id !== addressId),
-    }));
-  };
-
-  const handleSetDefaultAddress = (addressId) => {
-    setUser((prev) => ({
-      ...prev,
-      addresses: prev.addresses.map((addr) => ({
-        ...addr,
-        isDefault: addr.id === addressId,
-      })),
-    }));
-  };
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const { address, isLoading } = useSelector((state) => state.address);
 
   useEffect(() => {
     // Dummy user data
@@ -190,12 +108,111 @@ const AccountPage = () => {
         },
       ],
     };
-    setUser(dummyUser);
+    // setUser(dummyUser);
   }, []);
 
-  // if (!user && !isAuthenticated) {
-  //   return <Navigate to={'/'}/>
-  // }
+  useEffect(() => {
+    if (user?._id) {
+      dispatch(fetchAddresses(user._id));
+    }
+  }, [user, dispatch]);
+
+  if (isLoading) return <Loading />;
+  if (!user && !isAuthenticated) {
+    return <Navigate to={"/"} />;
+  }
+
+  const validateAddressForm = () => {
+    const errors = {};
+    if (!addressForm.street.trim())
+      errors.street = "Street address is required";
+    if (!addressForm.city.trim()) errors.city = "City is required";
+    if (!addressForm.state.trim()) errors.state = "State is required";
+    if (!addressForm.zipCode.trim()) errors.zipCode = "ZIP code is required";
+    return errors;
+  };
+
+  const handleAddressSubmit = (e) => {
+    e.preventDefault();
+    const errors = validateAddressForm();
+    if (Object.keys(errors).length === 0) {
+      if (editAddressId) {
+        // Update existing address
+        dispatch(
+          userEditAddress({
+            addressId: editAddressId,
+            userId: user._id,
+            ...addressForm,
+          })
+        )
+          .then(() => {
+            toast.success("Address updated successfully");
+            dispatch(fetchAddresses(user._id));
+          })
+          .catch((e) => {
+            toast.error("Failed to update address: ");
+          });
+      } else {
+        // Add new address
+        const newAddress = {
+          userId: user._id,
+          ...addressForm,
+        };
+        dispatch(userAddAddress(newAddress))
+          .then(() => {
+            toast.success("Address added successfully");
+            dispatch(fetchAddresses(user._id));
+          })
+          .catch((e) => {
+            toast.error("Failed to add address: ");
+          });
+      }
+      handleCloseForm();
+    } else {
+      setFormErrors(errors);
+    }
+  };
+
+  const handleEditAddress = (address) => {
+    console.log(address);
+    setEditAddressId(address._id);
+    setAddressForm({
+      type: address.type,
+      street: address.street,
+      city: address.city,
+      state: address.state,
+      zipCode: address.zipCode,
+      isDefault: address.isDefault,
+      country: address.country,
+    });
+    setShowAddressForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setShowAddressForm(false);
+    setEditAddressId(null);
+    setFormErrors({});
+    setAddressForm({
+      type: "Home",
+      street: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      isDefault: false,
+    });
+  };
+
+  const handleDeleteAddress = (addressId) => {
+    dispatch(addressDelete({ userId: user._id, addressId: addressId }))
+      .then(() => {
+        toast.success("Address deleted successfully");
+        dispatch(fetchAddresses(user._id));
+      })
+      .catch((e) => {
+        toast.error("Failed to delete address: ");
+        console.log(e);
+      });
+  };
 
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
@@ -523,31 +540,60 @@ const AccountPage = () => {
                           </div>
                         </div>
 
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            ZIP Code
-                          </label>
-                          <input
-                            type="text"
-                            value={addressForm.zipCode}
-                            onChange={(e) =>
-                              setAddressForm((prev) => ({
-                                ...prev,
-                                zipCode: e.target.value,
-                              }))
-                            }
-                            className={`block w-full rounded-lg border ${
-                              formErrors.zipCode
-                                ? "border-red-300"
-                                : "border-gray-200"
-                            } px-4 py-2.5 text-gray-900 focus:border-gray-900 focus:ring-gray-900 sm:text-sm`}
-                            placeholder="Enter ZIP code"
-                          />
-                          {formErrors.zipCode && (
-                            <p className="mt-1 text-sm text-red-600">
-                              {formErrors.zipCode}
-                            </p>
-                          )}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Country
+                            </label>
+                            <input
+                              type="text"
+                              value={addressForm.country}
+                              onChange={(e) =>
+                                setAddressForm((prev) => ({
+                                  ...prev,
+                                  country: e.target.value,
+                                }))
+                              }
+                              className={`block w-full rounded-lg border ${
+                                formErrors.country
+                                  ? "border-red-300"
+                                  : "border-gray-200"
+                              } px-4 py-2.5 text-gray-900 focus:border-gray-900 focus:ring-gray-900 sm:text-sm`}
+                              placeholder="Enter city"
+                            />
+                            {formErrors.country && (
+                              <p className="mt-1 text-sm text-red-600">
+                                {formErrors.country}
+                              </p>
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              ZIP Code
+                            </label>
+                            <input
+                              type="number"
+                              value={addressForm.zipCode}
+                              onChange={(e) =>
+                                setAddressForm((prev) => ({
+                                  ...prev,
+                                  zipCode: e.target.value,
+                                }))
+                              }
+                              className={`block w-full rounded-lg border ${
+                                formErrors.zipCode
+                                  ? "border-red-300"
+                                  : "border-gray-200"
+                              } px-4 py-2.5 text-gray-900 focus:border-gray-900 focus:ring-gray-900 sm:text-sm`}
+                              placeholder="Enter ZIP code"
+                            />
+                            {formErrors.zipCode && (
+                              <p className="mt-1 text-sm text-red-600">
+                                {formErrors.zipCode}
+                              </p>
+                            )}
+                          </div>
                         </div>
 
                         <div className="flex items-center">
@@ -592,59 +638,60 @@ const AccountPage = () => {
                 )}
 
                 <div className="space-y-4">
-                  {user.addresses.map((address) => (
-                    <div
-                      key={address.id}
-                      className="border border-gray-100 rounded-lg p-6 hover:border-gray-200 transition-colors duration-200"
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="font-medium text-gray-900">
-                              {address.type}
-                            </h3>
-                            {address.isDefault && (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-600">
-                                Default
-                              </span>
+                  {address.length === 0 ? (
+                    <p className="text-gray-600 text-sm">
+                      You have no addresses yet.
+                    </p>
+                  ) : (
+                    address.map((address) => (
+                      <div
+                        key={address._id}
+                        className="border border-gray-100 rounded-lg p-6 hover:border-gray-200 transition-colors duration-200"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h3 className="font-medium text-gray-900">
+                                {address.type}
+                              </h3>
+                              {address.isDefault && (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-600">
+                                  Default
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-gray-600">{address.street}</p>
+                            <p className="text-gray-600">
+                              {address.city}, {address.zipCode}
+                              <br/>
+                              {address.state}, {address.country}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              className="text-gray-500 hover:text-gray-700 font-medium text-sm"
+                              onClick={() => handleEditAddress(address)}
+                            >
+                              Edit
+                            </button>
+                            {!address.isDefault && (
+                              <>
+                                <span className="text-gray-300">|</span>
+                                <button
+                                  className="text-red-500 hover:text-red-600 font-medium text-sm"
+                                  onClick={() =>
+                                    handleDeleteAddress(address._id)
+                                  }
+                                >
+                                  Delete
+                                </button>
+                              </>
                             )}
                           </div>
-                          <p className="text-gray-600">{address.street}</p>
-                          <p className="text-gray-600">
-                            {address.city}, {address.state} {address.zipCode}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button
-                            className="text-gray-500 hover:text-gray-700 font-medium text-sm"
-                            onClick={() => handleEditAddress(address)}
-                          >
-                            Edit
-                          </button>
-                          {!address.isDefault && (
-                            <>
-                              <span className="text-gray-300">|</span>
-                              <button
-                                className="text-gray-500 hover:text-gray-700 font-medium text-sm"
-                                onClick={() =>
-                                  handleSetDefaultAddress(address.id)
-                                }
-                              >
-                                Set as Default
-                              </button>
-                              <span className="text-gray-300">|</span>
-                              <button
-                                className="text-red-500 hover:text-red-600 font-medium text-sm"
-                                onClick={() => handleDeleteAddress(address.id)}
-                              >
-                                Delete
-                              </button>
-                            </>
-                          )}
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </div>
             )}
