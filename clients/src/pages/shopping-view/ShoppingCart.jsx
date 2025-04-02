@@ -11,10 +11,11 @@ import {
 import { fetchUserProducts } from "../../store/user-product-slice";
 import { toast } from "react-toastify";
 import Loading from "../../components/common/Loading";
-
+import { useNavigate } from "react-router-dom";
 
 function ShoppingCart() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const { cartItems, isLoading, error } = useSelector((state) => state.cart);
   const { user, isAuthenticated } = useSelector((state) => state.auth);
@@ -59,20 +60,22 @@ function ShoppingCart() {
           toast.error("Failed to remove product from cart");
         });
     } else {
-      const updatedCartItems = cartItems.filter((item) => item.productId !== id);
+      const updatedCartItems = cartItems.filter(
+        (item) => item.productId !== id
+      );
       dispatch(updateLocalStorageItem({ cartItems: updatedCartItems }));
     }
   };
 
   const getTotalPrice = () => {
-    var TotalPrice=0;
+    var TotalPrice = 0;
     cartItems.map((item) => {
-      products.map((product) =>{
-        if(item.productId == product._id){
+      products.map((product) => {
+        if (item.productId == product._id) {
           TotalPrice += product.salePrice * item.quantity;
         }
-      })
-    })
+      });
+    });
     return TotalPrice;
   };
 
@@ -81,11 +84,10 @@ function ShoppingCart() {
     if (isAuthenticated) {
       dispatch(fetchCartItems(user._id));
     } else {
-      console.log(localStorage.getItem("addTOCartProduct"));
       const localStorageItem = JSON.parse(
         localStorage.getItem("addTOCartProduct")
       );
-      if (localStorageItem.length > 0) {
+      if (localStorageItem?.length > 0) {
         dispatch(getLocalStorageItem());
       }
     }
@@ -97,15 +99,35 @@ function ShoppingCart() {
   if (error) {
     return <div>{error}</div>;
   }
-  console.log(cartItems);
   return (
-    <div className="min-h-screen p-6 bg-white flex justify-center items-center">
-      <div className="max-w-4xl w-full bg-white p-8 rounded-lg shadow-lg border border-gray-300">
-        <h2 className="text-3xl font-bold mb-6 text-gray-900 text-center">
-          Shopping Cart
-        </h2>
+    <div className="min-h-screen bg-[#FAFAFA] py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto">
+        <div className="mb-12 flex flex-col sm:flex-row justify-between items-baseline">
+          <h2 className="text-3xl sm:text-4xl font-light text-black tracking-tight">
+            Shopping Cart
+          </h2>
+          <p className="text-sm text-gray-500 mt-2 sm:mt-0">
+            {cartItems.length} {cartItems.length === 1 ? "item" : "items"}
+          </p>
+        </div>
+
         {cartItems.length == 0 ? (
-          <p className="text-gray-600 text-center">Your cart is empty.</p>
+          <div className="text-center py-20 bg-white border border-gray-100">
+            <p className="text-gray-600 text-lg mb-8">
+              Your shopping cart is empty
+            </p>
+            <button
+              className="group relative px-8 py-3 bg-black text-white overflow-hidden"
+              onClick={() => {
+                navigate("/shop/home");
+              }}
+            >
+              <span className="relative z-10 transition-transform duration-500 group-hover:translate-x-1">
+                Continue Shopping
+              </span>
+              <div className="absolute inset-0 bg-gray-800 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500"></div>
+            </button>
+          </div>
         ) : (
           <>
             <div className="space-y-6">
@@ -113,39 +135,43 @@ function ShoppingCart() {
                 const item = products.find(
                   (product) => product._id === cartItem.productId
                 );
-                return(
+                return (
                   item && (
                     <div
                       key={item._id}
-                      className="flex flex-col sm:flex-row items-center justify-between p-5 border rounded-lg bg-gray-50 hover:shadow-md transition"
+                      className="flex flex-col sm:flex-row items-center gap-6 p-6 bg-white border border-gray-100 hover:border-black transition-all duration-300"
                     >
-                      <img
-                        src={item.image[0]}
-                        alt={item.title}
-                        className="w-24 h-24 object-cover rounded-lg"
-                      />
-                      <div className="flex-1 px-6 text-center sm:text-left">
-                        <h3 className="font-semibold text-lg text-gray-900">
+                      <div className="relative group overflow-hidden">
+                        <img
+                          src={item.image[0]}
+                          alt={item.title}
+                          className="w-32 h-32 object-cover transform transition-transform duration-500 group-hover:scale-105"
+                        />
+                      </div>
+
+                      <div className="flex-1 space-y-2 text-center sm:text-left">
+                        <h3 className="font-medium text-lg text-black hover:text-gray-700 transition-colors duration-300 cursor-pointer">
                           {item.title}
                         </h3>
-                        <p className="text-gray-600 text-md font-medium">
+                        <p className="text-gray-500 text-sm font-light">
                           ${item.salePrice.toFixed(2)}
                         </p>
                       </div>
+
                       <div className="flex items-center space-x-3">
                         <button
                           onClick={() => {
                             if (cartItem.quantity > 1) {
                               updateQuantity(item._id, cartItem.quantity - 1);
                             } else {
-                              toast.error("Cannot Lessthen 1");
+                              toast.error("Minimum quantity is 1");
                             }
                           }}
-                          className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
+                          className="w-8 h-8 flex items-center justify-center border border-gray-200 hover:border-black hover:bg-black hover:text-white transition-all duration-300"
                         >
-                          -
+                          −
                         </button>
-                        <span className="px-4 font-semibold text-gray-800 text-lg">
+                        <span className="w-12 text-center font-medium text-gray-800">
                           {cartItem.quantity}
                         </span>
                         <button
@@ -153,19 +179,23 @@ function ShoppingCart() {
                             if (cartItem.quantity < 10) {
                               updateQuantity(item._id, cartItem.quantity + 1);
                             } else {
-                              toast.error("Cannot Greater 10");
+                              toast.error("Maximum quantity is 10");
                             }
                           }}
-                          className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
+                          className="w-8 h-8 flex items-center justify-center border border-gray-200 hover:border-black hover:bg-black hover:text-white transition-all duration-300"
                         >
                           +
                         </button>
                       </div>
+
                       <button
                         onClick={() => removeFromCart(item._id)}
-                        className="text-red-500 hover:text-red-700 ml-4"
+                        className="group p-2 text-gray-400 hover:text-black transition-colors duration-300"
                       >
-                        <Trash2 size={24} />
+                        <Trash2
+                          size={20}
+                          className="transform group-hover:scale-110 transition-transform duration-300"
+                        />
                       </button>
                     </div>
                   )
@@ -173,13 +203,40 @@ function ShoppingCart() {
               })}
             </div>
 
-            <div className="mt-8 border-t pt-6 flex flex-col sm:flex-row justify-between items-center">
-              <h3 className="text-2xl font-semibold text-gray-900">
-                Total: ${getTotalPrice().toFixed(2)}
-              </h3>
-              <button className="mt-4 sm:mt-0 bg-blue-600 text-white px-8 py-3 rounded-lg text-lg hover:bg-blue-700 transition-all shadow-md">
-                Proceed to Checkout
-              </button>
+            <div className="mt-12 bg-white border border-gray-100 p-8">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-500 uppercase tracking-wider">
+                    Total Amount
+                  </p>
+                  <h3 className="text-3xl font-light text-black">
+                    ${getTotalPrice().toFixed(2)}
+                  </h3>
+                  <p className="text-xs text-gray-400">
+                    Tax included and shipping calculated at checkout
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                  <button
+                    className="group relative px-8 py-3 border border-black text-black overflow-hidden"
+                    onClick={() => {
+                      navigate("/shop/home");
+                    }}
+                  >
+                    <span className="relative z-10 transition-transform duration-500 group-hover:text-white">
+                      Continue Shopping
+                    </span>
+                    <div className="absolute inset-0 bg-black transform -translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+                  </button>
+                  <button className="group relative px-8 py-3 bg-black text-white overflow-hidden">
+                    <span className="relative z-10 transition-transform duration-500 group-hover:translate-x-1">
+                      Proceed to Checkout
+                    </span>
+                    <div className="absolute inset-0 bg-gray-800 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500"></div>
+                  </button>
+                </div>
+              </div>
             </div>
           </>
         )}

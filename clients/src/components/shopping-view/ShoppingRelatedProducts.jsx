@@ -1,44 +1,85 @@
-import React from "react";
+import React, { useRef } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingCart } from "lucide-react";
+import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 
 function ShoppingRelatedProducts({ relatedProductList, addToCart = null }) {
-  if (!relatedProductList.length) {
-    return <p className="text-center text-gray-600">No related products found.</p>;
-  }
+  const scrollContainerRef = useRef(null);
+
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({
+        left: -300,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({
+        left: 300,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   return (
-    <div className="mt-10 w-full flex flex-col items-center mb-10">
-      <h2 className="text-2xl font-semibold mb-6">Related Products</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full max-w-7xl px-4">
-        {relatedProductList.map((product) => (
-          <div
-            key={product.id}
-            className="bg-white rounded-lg shadow-lg p-4 transition duration-300 ease-in-out transform hover:scale-105 overflow-hidden"
+    <div className="relative">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold">You Might Also Like</h2>
+        <div className="flex gap-2">
+          <button 
+            onClick={scrollLeft}
+            className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:border-black transition-all duration-300"
           >
-            <Link to={`/shop/product/${product._id}`} className="block">
+            <ChevronLeft size={20} />
+          </button>
+          <button 
+            onClick={scrollRight}
+            className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:border-black transition-all duration-300"
+          >
+            <ChevronRight size={20} />
+          </button>
+        </div>
+      </div>
+      
+      <div 
+        ref={scrollContainerRef}
+        className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide snap-x"
+      >
+        {relatedProductList.map((product) => (
+          <Link 
+            key={product.id}
+            to={`/shop/product/${product._id}`}
+            className="flex-none w-[260px] snap-start bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md"
+          >
+            <div className="relative h-[260px] bg-gray-50 p-6 flex items-center justify-center">
               <img
                 src={product.image[0]}
                 alt={product.title}
-                className="w-full h-52 object-cover rounded-lg mb-4 transition duration-300 ease-in-out transform hover:scale-110 border-gray-200 border-b-2"
+                className="max-h-full max-w-full object-contain mix-blend-multiply"
               />
-            </Link>
-            <div className="flex flex-col items-start">
-              <h3 className="text-lg font-bold text-gray-800 mb-1">{product.title}</h3>
-              <p className="text-base text-gray-700 mb-2">
-                ${product.salePrice}
-                <span className="text-sm text-red-600 ml-2 line-through">${product.price}</span>
-              </p>
-              {addToCart && (
-                <button
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full flex items-center gap-2 transition duration-300 ease-in-out"
-                  onClick={() => addToCart(product._id)}
-                >
-                  <ShoppingCart size={18} /> Add to Cart
-                </button>
-              )}
             </div>
-          </div>
+            <div className="p-4">
+              <h3 className="font-medium text-gray-900 mb-2 line-clamp-1">
+                {product.title}
+              </h3>
+              <div className="flex items-baseline justify-between">
+                <div>
+                  <span className="text-lg font-bold">${product.salePrice}</span>
+                  {product.price > product.salePrice && (
+                    <span className="text-sm text-gray-500 line-through ml-2">
+                      ${product.price}
+                    </span>
+                  )}
+                </div>
+                <div className="flex text-yellow-400">
+                  <Star fill="currentColor" size={14} />
+                  <span className="text-xs text-gray-600 ml-1">{product.averageReview.toFixed(1)}</span>
+                </div>
+              </div>
+            </div>
+          </Link>
         ))}
       </div>
     </div>

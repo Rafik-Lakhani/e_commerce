@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useParams, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProductDetails } from "../../store/user-product-slice";
 import ShoppingProductDetail from "../../components/shopping-view/ShoppingProductDetail";
@@ -8,6 +8,8 @@ import ShoppingProductReviews from "../../components/shopping-view/ShoppingProdu
 import { addToCart as AddProductInCart, fetchCartItems } from "../../store/cart-slice.js";
 import { toast } from "react-toastify";
 import Loading from "../../components/common/Loading.jsx";
+import { getLocalStorageItem} from '../../store/cart-slice.js';
+import { ArrowUp } from "lucide-react";
 
 function ShoppingProduct() {
   const { id } = useParams();
@@ -15,9 +17,9 @@ function ShoppingProduct() {
   const { productDetails, relatedProducts, isLoading, error } = useSelector(
     (state) => state.userProdcuts
   );
-  console.log(productDetails, relatedProducts, isLoading, error);
   const [quantity, setQuantity] = useState(1);
   const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const [showBackToTop, setShowBackToTop] = useState(false);
 
   if (!id) {
     return <Navigate to="/" />;
@@ -25,12 +27,18 @@ function ShoppingProduct() {
 
   // Fetch product details from API
   useEffect(() => {
-    console.log("Fetching Product ID:", id);
     dispatch(fetchProductDetails(id));
+    
+    // Back to top button visibility handler
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 300);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [id, dispatch]);
 
   const addToCart = (productId) => {
-    console.log("Add to cart:", productId);
     if (isAuthenticated) {
       localStorage.removeItem("addTOCartProduct");
       dispatch(
@@ -40,33 +48,29 @@ function ShoppingProduct() {
           quantity: quantity,
         })
       )
-        .then((data) => {
+        .then(() => {
           dispatch(fetchCartItems(user._id));
           toast.success("Product added successfully");
         })
         .catch((error) => {
-          console.log("Error adding product to cart", error);
           toast.error("Failed to add product to cart");
         });
     } else {
       const alreadyProduct =
         JSON.parse(localStorage.getItem("addTOCartProduct")) || [];
 
-      // Find the index of the existing product in the cart
       const productIndex = alreadyProduct.findIndex(
         (item) => item.productId === productId
       );
 
       if (productIndex !== -1) {
-        // If product exists, update its quantity
         alreadyProduct[productIndex].quantity = quantity;
       } else {
-        // If product is not in cart, add new entry
         alreadyProduct.push({ productId, quantity });
       }
 
-      // Save updated cart data in localStorage
       localStorage.setItem("addTOCartProduct", JSON.stringify(alreadyProduct));
+      dispatch(getLocalStorageItem());
       toast.success("Product added successfully");
     }
   };
@@ -75,30 +79,60 @@ function ShoppingProduct() {
   if (error) return <div className="text-red-500">{error}</div>;
 
   return productDetails || relatedProducts ? (
-    <div className="flex flex-col items-center justify-center m-auto">
-      {productDetails && (
-        <div className="w-full max-w-4xl">
-          <ShoppingProductDetail
-            product={productDetails}
-            addToCart={addToCart}
-            quantity={quantity}
-            setQuantity={setQuantity}
-          />
-        </div>
-      )}
-      {relatedProducts?.length > 0 && (
-        <div className="w-full max-w-6xl">
-          <ShoppingRelatedProducts
-            relatedProductList={relatedProducts}
-            addToCart={addToCart}
-          />
-        </div>
-      )}
-      {productDetails && (
-        <div className="w-full flex justify-start items-start">
-          <ShoppingProductReviews product={productDetails} />
-        </div>
-      )}
+    <div className="min-h-screen bg-white font-sans">
+      {/* Subtle breadcrumb navigation */}
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-4">
+        <nav className="flex items-center space-x-2 text-sm text-gray-500">
+          <Link to="/" className="transition-colors duration-300 hover:text-black">Home</Link>
+          <span>/</span>
+          <Link to="/shop/listing" className="transition-colors duration-300 hover:text-black">Eyewear</Link>
+          <span>/</span>
+          <span className="text-black font-medium">{productDetails?.title}</span>
+        </nav>
+      </div>
+
+      {/* Main product content */}
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 pb-20">
+        {/* Product detail section */}
+        <section className="mb-20">
+          {productDetails && (
+            <ShoppingProductDetail
+              product={productDetails}
+              addToCart={addToCart}
+              quantity={quantity}
+              setQuantity={setQuantity}
+            />
+          )}
+        </section>
+
+        {/* Reviews section */}
+        <section className="mb-20">
+          {productDetails && (
+            <ShoppingProductReviews product={productDetails} />
+          )}
+        </section>
+
+        {/* Related Products */}
+        {relatedProducts?.length > 0 && (
+          <section className="mb-10">
+            <ShoppingRelatedProducts
+              relatedProductList={relatedProducts}
+              addToCart={addToCart}
+            />
+          </section>
+        )}
+      </div>
+
+      {/* Back to top button with smooth transition */}
+      <button 
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        className={`fixed bottom-6 right-6 bg-black text-white w-12 h-12 rounded-full flex items-center justify-center shadow-md transition-all duration-300 ${
+          showBackToTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
+        }`}
+        aria-label="Back to top"
+      >
+        <ArrowUp size={20} />
+      </button>
     </div>
   ) : (
     <Navigate to="/shop/home" />
