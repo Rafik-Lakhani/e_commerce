@@ -12,10 +12,6 @@ function ShoppingFilterSection({
     category: true,
   });
 
-  // Bag-specific filter options
-  const brands = ["Louis Vuitton", "Coach", "Michael Kors", "Kate Spade", "Gucci", "Prada", "Chanel"];
-  const materials = ["Leather", "Canvas", "Nylon", "Faux Leather", "Polyester", "Cotton", "Suede"];
-  const colors = ["#000000", "#FFFFFF", "#A52A2A", "#D3D3D3", "#0000FF", "#FFD700", "#228B22", "#FF69B4"];
   
   const toggleSection = (section) => {
     setExpandedSections({

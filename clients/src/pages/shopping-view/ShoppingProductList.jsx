@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useLocation, useParams } from "react-router-dom";
 import { fetchUserProducts } from "../../store/user-product-slice.js";
 import ShoppingCards from "../../components/shopping-view/ShoppingCards";
 import ShoppingFilterSection from "../../components/shopping-view/ShoppingFilterSection";
@@ -21,10 +22,21 @@ function ShoppingProductList() {
   const [viewMode, setViewMode] = useState('grid');
   
   const dispatch = useDispatch();
+  const location = useLocation();
+  const { category } = useParams();
   const { products, isLoading, error } = useSelector(
     (state) => state.userProdcuts
   );
   const { user, isAuthenticated } = useSelector((state) => state.auth);
+
+  // Handle URL-based filtering
+  useEffect(() => {
+    if (location.state?.filter === 'newest') {
+      setSortBy('newest');
+    } else if (category) {
+      setCategoryFilter([category]);
+    }
+  }, [location.state, category]);
 
   function addToCart(productId) {
     if (isAuthenticated) {
@@ -74,7 +86,7 @@ function ShoppingProductList() {
     dispatch(fetchUserProducts());
   }, [dispatch]);
 
-  // Filter products based on categories and search
+  // Filter products based on categories, search, and sorting
   useEffect(() => {
     let filtered = products;
     

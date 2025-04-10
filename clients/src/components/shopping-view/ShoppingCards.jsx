@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ShoppingCart, Star } from 'lucide-react';
 
 function ShoppingCards({ products = [], filteredProducts = [], addToCart, viewMode = 'grid' }) {
+  
   if (products.length > 0 && filteredProducts.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-gray-500 bg-gray-50 rounded-md">

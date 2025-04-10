@@ -21,6 +21,7 @@ import ShoppingProduct from "./pages/shopping-view/ShoppingProduct.jsx";
 import ShoppingCart from "./pages/shopping-view/ShoppingCart.jsx";
 import ShoppingCheckOut from "./pages/shopping-view/ShoppingCheckOut.jsx";
 import Loading from "./components/common/Loading.jsx";
+import ShoppingSearch from "./pages/shopping-view/ShoppingSearch.jsx";
 
 function App() {
   // const navigate = useNavigate();
@@ -74,6 +75,8 @@ function App() {
         <Route path="/shop" element={<ShoppingLayout />}>
           <Route path="home" element={<ShoppingHome />} />
           <Route path="listing" element={<ShoppingProductList />} />
+          <Route path="listing/:category" element={<ShoppingProductList />} />
+          <Route path="search" element={<ShoppingSearch />} />
           <Route path="cart" element={<ShoppingCart />} />
           <Route path="search" element={<ShoppingCheckOut />} />
           <Route path="product/:id" element={<ShoppingProduct />} />
